@@ -1,0 +1,36 @@
+name: Agent Skills CI
+description: Validate, lint, and score Claude/Hermes/AI-agent skills.
+author: R P
+branding:
+  icon: check-circle
+  color: purple
+inputs:
+  path:
+    description: Directory or SKILL.md file to validate
+    required: false
+    default: skills
+  min-score:
+    description: Minimum per-skill score
+    required: false
+    default: "80"
+  format:
+    description: Report format: text, markdown, or json
+    required: false
+    default: text
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    - name: Install agentskills-ci
+      shell: bash
+      run: |
+        if [ -f "$GITHUB_ACTION_PATH/pyproject.toml" ]; then
+          pip install "$GITHUB_ACTION_PATH"
+        else
+          pip install agentskills-ci
+        fi
+    - name: Validate agent skills
+      shell: bash
+      run: agentskills-ci check "${{ inputs.path }}" --min-score "${{ inputs.min-score }}" --format "${{ inputs.format }}"

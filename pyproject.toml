@@ -1,0 +1,30 @@
+[build-system]
+requires = ["hatchling>=1.18"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agentskills-ci"
+version = "0.1.0"
+description = "Test, lint, score, and package Claude/Hermes/AI-agent skills like real software."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "R P" }]
+keywords = ["claude", "skills", "ai-agents", "ci", "lint", "evals", "github-actions"]
+dependencies = ["PyYAML>=6.0"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.5", "build>=1.2"]
+
+[project.scripts]
+agentskills-ci = "agentskills_ci.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agentskills_ci"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
