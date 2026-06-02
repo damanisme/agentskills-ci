@@ -18,17 +18,23 @@ RISKY_PATTERNS = (
     ("sudo destructive command", re.compile(r"\bsudo\s+(?:rm|dd|mkfs|shutdown|reboot)\b")),
     ("secret literal", re.compile(r"(?i)(api[_-]?key|token|secret)\s*=\s*['\"][A-Za-z0-9_\-]{16,}")),
 )
-SIDE_EFFECT_TERMS = (
-    "send email",
-    "post to twitter",
-    "tweet",
-    "deploy",
-    "publish",
-    "charge card",
-    "delete production",
-    "merge the pr",
+SIDE_EFFECT_PATTERNS = (
+    re.compile(r"\bsend\s+email\b", re.IGNORECASE),
+    re.compile(r"\bpost\s+to\s+twitter\b", re.IGNORECASE),
+    re.compile(r"\btweet\b", re.IGNORECASE),
+    re.compile(r"\bdeploy\b", re.IGNORECASE),
+    re.compile(r"\bpublish\b", re.IGNORECASE),
+    re.compile(r"\bcharge\s+card\b", re.IGNORECASE),
+    re.compile(r"\bdelete\s+production\b", re.IGNORECASE),
+    re.compile(r"\bmerge\s+the\s+pr\b", re.IGNORECASE),
 )
-APPROVAL_TERMS = ("ask", "confirm", "approval", "explicit permission", "user approves")
+APPROVAL_PATTERNS = (
+    re.compile(r"\bask\b", re.IGNORECASE),
+    re.compile(r"\bconfirm\b", re.IGNORECASE),
+    re.compile(r"\bapproval\b", re.IGNORECASE),
+    re.compile(r"\bexplicit\s+permission\b", re.IGNORECASE),
+    re.compile(r"\buser\s+approves\b", re.IGNORECASE),
+)
 
 
 @dataclass(frozen=True)
@@ -47,14 +53,17 @@ class ValidationResult:
 
     @property
     def passed(self) -> bool:
-        return self.score >= 80 and not any(issue.severity == "error" for issue in self.issues)
+        return self.passes()
 
-    def to_dict(self) -> dict:
+    def passes(self, min_score: int = 80) -> bool:
+        return self.score >= min_score and not any(issue.severity == "error" for issue in self.issues)
+
+    def to_dict(self, min_score: int = 80) -> dict:
         return {
             "name": self.skill.name,
             "path": str(self.skill.path),
             "score": self.score,
-            "passed": self.passed,
+            "passed": self.passes(min_score),
             "issues": [issue.__dict__ for issue in self.issues],
         }
 
@@ -117,9 +126,8 @@ def _validate_security(skill: Skill, issues: list[Issue]) -> None:
         if pattern.search(combined):
             issues.append(Issue("error", f"Risky command pattern found: {label}", 20))
 
-    lowered = combined.lower()
-    has_side_effect = any(term in lowered for term in SIDE_EFFECT_TERMS)
-    has_approval_gate = any(term in lowered for term in APPROVAL_TERMS)
+    has_side_effect = any(pattern.search(combined) for pattern in SIDE_EFFECT_PATTERNS)
+    has_approval_gate = any(pattern.search(combined) for pattern in APPROVAL_PATTERNS)
     if has_side_effect and not has_approval_gate:
         issues.append(Issue("warning", "Side-effect instruction lacks an approval gate", 12))
 

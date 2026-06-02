@@ -53,6 +53,33 @@ def test_cli_check_json_report_contains_scores(tmp_path: Path, capsys):
     assert payload["results"][0]["score"] >= 90
 
 
+def test_cli_min_score_controls_exit_code_and_summary(tmp_path: Path, capsys):
+    skill_dir = tmp_path / "skills" / "warning-only"
+    skill_dir.mkdir(parents=True)
+    (skill_dir / "SKILL.md").write_text(
+        """---
+name: warning-only
+description: Testing a warning-only skill below the default threshold.
+---
+# Warning Only
+
+This skill has no error-level issues. It intentionally omits recommended sections while keeping enough body text to avoid the very-short-body warning.
+""",
+        encoding="utf-8",
+    )
+
+    exit_code = main(
+        ["check", str(tmp_path / "skills"), "--min-score", "60", "--format", "json"]
+    )
+
+    payload = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert payload["summary"]["passed"] == 1
+    assert payload["summary"]["failed"] == 0
+    assert 60 <= payload["results"][0]["score"] < 80
+    assert payload["results"][0]["passed"] is True
+
+
 def test_cli_init_github_action_writes_workflow(tmp_path: Path):
     exit_code = main(["init-github-action", "--repo", str(tmp_path), "--path", "skills"])
 

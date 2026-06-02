@@ -6,18 +6,18 @@ from statistics import mean
 from .validators import ValidationResult
 
 
-def summarize(results: list[ValidationResult]) -> dict:
+def summarize(results: list[ValidationResult], min_score: int = 80) -> dict:
     scores = [result.score for result in results]
     return {
         "total": len(results),
-        "passed": sum(1 for result in results if result.passed),
-        "failed": sum(1 for result in results if not result.passed),
+        "passed": sum(1 for result in results if result.passes(min_score)),
+        "failed": sum(1 for result in results if not result.passes(min_score)),
         "overall_score": round(mean(scores)) if scores else 0,
     }
 
 
-def render_text(results: list[ValidationResult]) -> str:
-    summary = summarize(results)
+def render_text(results: list[ValidationResult], min_score: int = 80) -> str:
+    summary = summarize(results, min_score)
     status = "✅" if summary["failed"] == 0 else "⚠️"
     lines = [
         f"{status} {summary['total']} skills checked",
@@ -34,8 +34,8 @@ def render_text(results: list[ValidationResult]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def render_markdown(results: list[ValidationResult]) -> str:
-    summary = summarize(results)
+def render_markdown(results: list[ValidationResult], min_score: int = 80) -> str:
+    summary = summarize(results, min_score)
     lines = [
         "# Agent Skills CI Report",
         "",
@@ -48,7 +48,7 @@ def render_markdown(results: list[ValidationResult]) -> str:
         "",
     ]
     for result in results:
-        icon = "✅" if result.passed else "⚠️"
+        icon = "✅" if result.passes(min_score) else "⚠️"
         lines.append(f"### {icon} {result.skill.name} — {result.score}/100")
         if result.issues:
             for issue in result.issues:
@@ -59,9 +59,9 @@ def render_markdown(results: list[ValidationResult]) -> str:
     return "\n".join(lines)
 
 
-def render_json(results: list[ValidationResult]) -> str:
+def render_json(results: list[ValidationResult], min_score: int = 80) -> str:
     payload = {
-        "summary": summarize(results),
-        "results": [result.to_dict() for result in results],
+        "summary": summarize(results, min_score),
+        "results": [result.to_dict(min_score) for result in results],
     }
     return json.dumps(payload, indent=2, sort_keys=True) + "\n"

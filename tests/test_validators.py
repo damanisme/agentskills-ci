@@ -95,3 +95,31 @@ See `scripts/missing.sh`.
     assert any("Referenced path does not exist: scripts/missing.sh" == i.message for i in result.issues)
     assert any("Risky command pattern found: rm -rf" == i.message for i in result.issues)
     assert any("Side-effect instruction lacks an approval gate" in i.message for i in result.issues)
+
+
+def test_validate_does_not_treat_task_as_ask_approval_gate(tmp_path: Path):
+    skill = make_skill(
+        tmp_path,
+        """---
+name: deploy-task
+description: Use when demonstrating side-effect gate detection.
+---
+# Deploy Task
+
+## Overview
+This task will deploy to production automatically.
+
+## When to Use
+- Demo
+
+## Common Pitfalls
+1. Side effects need human review.
+
+## Verification Checklist
+- [ ] Verified
+""",
+    )
+
+    result = validate_skill(skill)
+
+    assert any("Side-effect instruction lacks an approval gate" in i.message for i in result.issues)

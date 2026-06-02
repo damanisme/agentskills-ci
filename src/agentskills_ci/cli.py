@@ -70,13 +70,13 @@ def _run_check(path: Path, output_format: str, min_score: int) -> int:
 
     results = [validate_skill(parse_skill_file(file)) for file in files]
     if output_format == "json":
-        print(render_json(results), end="")
+        print(render_json(results, min_score), end="")
     elif output_format == "markdown":
-        print(render_markdown(results))
+        print(render_markdown(results, min_score))
     else:
-        print(render_text(results), end="")
+        print(render_text(results, min_score), end="")
 
-    failed = [result for result in results if result.score < min_score or not result.passed]
+    failed = [result for result in results if not result.passes(min_score)]
     return 1 if failed else 0
 
 
