@@ -80,6 +80,31 @@ This skill has no error-level issues. It intentionally omits recommended section
     assert payload["results"][0]["passed"] is True
 
 
+def test_cli_badge_emits_markdown_with_score(tmp_path: Path, capsys):
+    write_good_skill(tmp_path)
+
+    exit_code = main(
+        ["badge", str(tmp_path / "skills"), "--repo", "https://github.com/me/repo"]
+    )
+
+    out = capsys.readouterr().out.strip()
+    assert exit_code == 0
+    assert out.startswith("[![skill score](https://img.shields.io/badge/skill%20score-")
+    assert out.endswith("(https://github.com/me/repo)")
+
+
+def test_cli_badge_endpoint_is_valid_shields_json(tmp_path: Path, capsys):
+    write_good_skill(tmp_path)
+
+    exit_code = main(["badge", str(tmp_path / "skills"), "--format", "endpoint"])
+
+    payload = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert payload["schemaVersion"] == 1
+    assert payload["label"] == "skill score"
+    assert payload["color"] == "brightgreen"
+
+
 def test_cli_init_github_action_writes_workflow(tmp_path: Path):
     exit_code = main(["init-github-action", "--repo", str(tmp_path), "--path", "skills"])
 
