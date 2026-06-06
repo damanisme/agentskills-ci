@@ -186,6 +186,8 @@ Agent skills are operational runbooks. A bad skill can:
 
 ## Roadmap
 
+See [`ROADMAP.md`](ROADMAP.md) for the full list. Highlights:
+
 - SARIF output for GitHub code scanning
 - ✅ Badge endpoint / static badge generation (`agentskills-ci badge`)
 - Skill registry quality cards
