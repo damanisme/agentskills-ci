@@ -1,5 +1,7 @@
 # agentskills-ci
 
+![skill score](https://img.shields.io/badge/skill%20score-100-brightgreen)
+
 > **Test, lint, score, and package Claude/Hermes/AI-agent skills like real software.**
 
 Claude Skills and agent workflows are becoming reusable software artifacts, but most teams still ship them as loose prompt files. No CI. No tests. No linked-file checks. No safety scan. No quality score.
@@ -101,7 +103,28 @@ A sample workflow is included at `examples/github-workflows/ci.yml`.
 agentskills-ci check PATH [--format text|markdown|json] [--min-score 80]
 agentskills-ci score PATH [--format text|markdown|json]
 agentskills-ci init-github-action [--repo .] [--path skills]
+agentskills-ci badge PATH [--format markdown|url|endpoint] [--label "skill score"] [--repo URL]
 ```
+
+### Quality badge
+
+Show your skill score in any README. Generate a static badge:
+
+```bash
+agentskills-ci badge ./skills --repo https://github.com/you/your-repo
+# [![skill score](https://img.shields.io/badge/skill%20score-100-brightgreen)](https://github.com/you/your-repo)
+```
+
+Or wire a live, self-updating badge via a shields.io endpoint. Publish the JSON
+from `agentskills-ci badge ./skills --format endpoint` to a URL, then point
+shields.io at it:
+
+```md
+![skill score](https://img.shields.io/endpoint?url=https://your-host/skill-score.json)
+```
+
+Badge color tracks the score: `>=90` brightgreen, `>=80` green, `>=60` yellow,
+`>=40` orange, else red.
 
 `PATH` can be either a single `SKILL.md` file or a directory containing nested skill folders.
 
@@ -164,7 +187,7 @@ Agent skills are operational runbooks. A bad skill can:
 ## Roadmap
 
 - SARIF output for GitHub code scanning
-- Badge endpoint / static badge generation
+- ✅ Badge endpoint / static badge generation (`agentskills-ci badge`)
 - Skill registry quality cards
 - LLM-assisted skill critique mode
 - Overlap detection between related skills
