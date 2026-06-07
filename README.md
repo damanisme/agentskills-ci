@@ -1,6 +1,9 @@
 # agentskills-ci
 
 [![CI](https://github.com/damanisme/agentskills-ci/actions/workflows/ci.yml/badge.svg)](https://github.com/damanisme/agentskills-ci/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/agentskills-ci)](https://pypi.org/project/agentskills-ci/)
+[![Python versions](https://img.shields.io/pypi/pyversions/agentskills-ci)](https://pypi.org/project/agentskills-ci/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 ![skill score](https://img.shields.io/badge/skill%20score-100-brightgreen)
 
 > **Test, lint, score, and package Claude/Hermes/AI-agent skills like real software.**
@@ -8,6 +11,34 @@
 Claude Skills and agent workflows are becoming reusable software artifacts, but most teams still ship them as loose prompt files. No CI. No tests. No linked-file checks. No safety scan. No quality score.
 
 `agentskills-ci` gives AI-agent skills the same quality discipline teams expect from code.
+
+## Demo
+
+Score a whole skills directory in one command — pass on the good, fail on the dangerous:
+
+```console
+$ agentskills-ci score ./skills
+
+⚠️ 3 skills checked
+✅ 2 passed
+⚠️  1 need fixes
+
+Overall score: 68/100
+
+Top issues:
+- bad-skill: Risky command pattern found: rm -rf
+- bad-skill: Side-effect instruction lacks an approval gate
+- bad-skill: Referenced path does not exist: scripts/missing.sh
+```
+
+```console
+$ agentskills-ci badge ./skills --repo https://github.com/you/your-repo
+[![skill score](https://img.shields.io/badge/skill%20score-100-brightgreen)](https://github.com/you/your-repo)
+```
+
+<!-- To record a GIF for this section:
+     asciinema rec demo.cast -c "agentskills-ci score ./skills"
+     agg demo.cast docs/demo.gif   # then embed: ![demo](docs/demo.gif) -->
 
 ## What it does
 
