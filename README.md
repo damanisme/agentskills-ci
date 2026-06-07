@@ -126,7 +126,7 @@ shields.io at it:
 Badge color tracks the score: `>=90` brightgreen, `>=80` green, `>=60` yellow,
 `>=40` orange, else red.
 
-`PATH` can be either a single `SKILL.md` file or a directory containing nested skill folders.
+`PATH` can be either a single `SKILL.md` file or a directory containing nested skill folders. Symlinked skill directories are followed (with cycle protection), so an aggregated `skills/` folder that links skills in from elsewhere is fully scanned.
 
 ## What gets checked
 

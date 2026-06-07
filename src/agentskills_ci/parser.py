@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -52,12 +53,29 @@ def parse_skill_file(path: str | Path) -> Skill:
 
 
 def discover_skill_files(path: str | Path) -> list[Path]:
-    """Return all SKILL.md files under a directory, sorted for stable CI output."""
+    """Return all SKILL.md files under a directory, sorted for stable CI output.
+
+    Symlinked skill directories are followed (a skills folder commonly aggregates
+    skills via symlinks), with cycle protection so a self-referential link cannot
+    loop forever. Files are de-duplicated by their real path.
+    """
 
     root = Path(path)
     if root.is_file():
         return [root]
-    return sorted(p for p in root.rglob("SKILL.md") if p.is_file())
+
+    visited_dirs: set[str] = set()
+    found: dict[str, Path] = {}
+    for dirpath, dirnames, filenames in os.walk(root, followlinks=True):
+        real_dir = os.path.realpath(dirpath)
+        if real_dir in visited_dirs:
+            dirnames[:] = []  # already walked this real dir; stop descending (cycle guard)
+            continue
+        visited_dirs.add(real_dir)
+        if "SKILL.md" in filenames:
+            skill_path = Path(dirpath) / "SKILL.md"
+            found.setdefault(os.path.realpath(skill_path), skill_path)
+    return sorted(found.values())
 
 
 def _extract_referenced_paths(markdown: str) -> list[Path]:

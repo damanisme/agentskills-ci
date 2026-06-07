@@ -52,3 +52,35 @@ def test_discover_skill_files_finds_nested_skill_md(tmp_path: Path):
     found = discover_skill_files(tmp_path / "skills")
 
     assert [p.parent.name for p in found] == ["one", "two"]
+
+
+def test_discover_skill_files_follows_symlinked_skill_dirs(tmp_path: Path):
+    # A real skill living outside the scanned tree...
+    external = tmp_path / "external" / "linked"
+    external.mkdir(parents=True)
+    (external / "SKILL.md").write_text(
+        "---\nname: linked\ndescription: ok\n---\n# Linked", encoding="utf-8"
+    )
+    # ...aggregated into the skills folder via a directory symlink.
+    skills = tmp_path / "skills"
+    skills.mkdir()
+    (skills / "linked").symlink_to(external, target_is_directory=True)
+
+    found = discover_skill_files(skills)
+
+    assert [p.parent.name for p in found] == ["linked"]
+
+
+def test_discover_skill_files_survives_symlink_cycle(tmp_path: Path):
+    skills = tmp_path / "skills"
+    one = skills / "one"
+    one.mkdir(parents=True)
+    (one / "SKILL.md").write_text(
+        "---\nname: one\ndescription: ok\n---\n# One", encoding="utf-8"
+    )
+    # A directory that links back to its parent would loop without cycle protection.
+    (one / "loop").symlink_to(skills, target_is_directory=True)
+
+    found = discover_skill_files(skills)
+
+    assert [p.parent.name for p in found] == ["one"]
