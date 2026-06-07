@@ -1,5 +1,6 @@
 # agentskills-ci
 
+[![CI](https://github.com/damanisme/agentskills-ci/actions/workflows/ci.yml/badge.svg)](https://github.com/damanisme/agentskills-ci/actions/workflows/ci.yml)
 ![skill score](https://img.shields.io/badge/skill%20score-100-brightgreen)
 
 > **Test, lint, score, and package Claude/Hermes/AI-agent skills like real software.**
