@@ -22,5 +22,14 @@ jobs:
         run: ruff check src tests
       - name: Test
         run: pytest -q
-      - name: Self-score example skills
-        run: agentskills-ci score examples/skills
+      - name: Self-score good example skills
+        run: |
+          agentskills-ci score examples/skills/good-skill
+          agentskills-ci score examples/skills/fixed-skill
+      - name: Bad example must fail the gate
+        run: |
+          if agentskills-ci check examples/skills/bad-skill; then
+            echo "bad-skill unexpectedly passed the gate" >&2
+            exit 1
+          fi
+          echo "bad-skill correctly failed the gate"
