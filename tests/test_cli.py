@@ -130,3 +130,20 @@ def test_cli_text_output_survives_legacy_windows_encoding(tmp_path: Path, monkey
     cp1252_stdout.flush()
     out = cp1252_stdout.buffer.getvalue().decode("utf-8", errors="replace")
     assert "skills checked" in out
+
+
+def test_cli_output_flag_writes_utf8_report(tmp_path: Path, capsys):
+    write_good_skill(tmp_path)
+    out_file = tmp_path / "report.md"
+
+    exit_code = main(
+        ["score", str(tmp_path / "skills"), "--format", "markdown", "-o", str(out_file)]
+    )
+
+    assert exit_code == 0
+    assert out_file.exists()
+    # File holds the report (UTF-8, emoji intact); stdout only confirms the write.
+    content = out_file.read_text(encoding="utf-8")
+    assert "Agent Skills CI Report" in content
+    assert "✅" in content
+    assert f"Wrote {out_file}" in capsys.readouterr().out

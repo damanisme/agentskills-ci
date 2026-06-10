@@ -4,6 +4,13 @@ All notable changes to `agentskills-ci` are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project aims to follow
 [Semantic Versioning](https://semver.org/).
 
+## [0.1.2] - 2026-06-09
+
+### Added
+- `score` and `check` accept `-o/--output FILE` to write the report to a file as
+  UTF-8 (instead of stdout). Avoids the Windows `>` redirect writing UTF-16 and
+  mangling the status icons.
+
 ## [0.1.1] - 2026-06-09
 
 ### Fixed

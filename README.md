@@ -132,8 +132,8 @@ A sample workflow is included at `examples/github-workflows/ci.yml`.
 ## CLI
 
 ```bash
-agentskills-ci check PATH [--format text|markdown|json] [--min-score 80]
-agentskills-ci score PATH [--format text|markdown|json]
+agentskills-ci check PATH [--format text|markdown|json] [--min-score 80] [-o FILE]
+agentskills-ci score PATH [--format text|markdown|json] [-o FILE]
 agentskills-ci init-github-action [--repo .] [--path skills]
 agentskills-ci badge PATH [--format markdown|url|endpoint] [--label "skill score"] [--repo URL]
 ```
