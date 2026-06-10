@@ -44,11 +44,13 @@ def build_parser() -> argparse.ArgumentParser:
     check.add_argument("path", help="Skill directory or SKILL.md file")
     check.add_argument("--format", choices=("text", "markdown", "json"), default="text")
     check.add_argument("--min-score", type=int, default=80, help="Minimum per-skill passing score")
+    check.add_argument("-o", "--output", default=None, help="Write the report to this file (UTF-8) instead of stdout")
 
     score = subparsers.add_parser("score", help="Alias for check that prints reports")
     score.add_argument("path", help="Skill directory or SKILL.md file")
     score.add_argument("--format", choices=("text", "markdown", "json"), default="text")
     score.add_argument("--min-score", type=int, default=0, help="Minimum per-skill passing score")
+    score.add_argument("-o", "--output", default=None, help="Write the report to this file (UTF-8) instead of stdout")
 
     init = subparsers.add_parser("init-github-action", help="Create .github workflow for agentskills-ci")
     init.add_argument("--repo", default=".", help="Repository root where workflow should be written")
@@ -82,7 +84,7 @@ def main(argv: list[str] | None = None) -> int:
     _force_utf8_output()
     args = build_parser().parse_args(argv)
     if args.command in {"check", "score"}:
-        return _run_check(Path(args.path), args.format, args.min_score)
+        return _run_check(Path(args.path), args.format, args.min_score, args.output)
     if args.command == "init-github-action":
         return _init_github_action(Path(args.repo), args.path)
     if args.command == "badge":
@@ -90,7 +92,7 @@ def main(argv: list[str] | None = None) -> int:
     raise AssertionError(f"Unhandled command: {args.command}")
 
 
-def _run_check(path: Path, output_format: str, min_score: int) -> int:
+def _run_check(path: Path, output_format: str, min_score: int, output: str | None = None) -> int:
     files = discover_skill_files(path)
     if not files:
         print(f"No SKILL.md files found under {path}", file=sys.stderr)
@@ -98,11 +100,17 @@ def _run_check(path: Path, output_format: str, min_score: int) -> int:
 
     results = [validate_skill(parse_skill_file(file)) for file in files]
     if output_format == "json":
-        print(render_json(results, min_score), end="")
+        report = render_json(results, min_score)
     elif output_format == "markdown":
-        print(render_markdown(results, min_score))
+        report = render_markdown(results, min_score) + "\n"
     else:
-        print(render_text(results, min_score), end="")
+        report = render_text(results, min_score)
+
+    if output:
+        Path(output).write_text(report, encoding="utf-8")
+        print(f"Wrote {output}")
+    else:
+        print(report, end="")
 
     failed = [result for result in results if not result.passes(min_score)]
     return 1 if failed else 0

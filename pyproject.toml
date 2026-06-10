@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "agentskills-ci"
-version = "0.1.1"
+version = "0.1.2"
 description = "Test, lint, score, and package Claude/Hermes/AI-agent skills like real software."
 readme = "README.md"
 requires-python = ">=3.9"
