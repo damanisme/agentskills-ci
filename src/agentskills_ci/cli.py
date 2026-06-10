@@ -62,7 +62,24 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _force_utf8_output() -> None:
+    """Ensure stdout/stderr can emit non-ASCII (emoji in reports).
+
+    On Windows the default console encoding is often a legacy code page such as
+    cp1252, which raises UnicodeEncodeError on characters like the status icons.
+    Reconfiguring to UTF-8 with replacement keeps output working everywhere.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            try:
+                reconfigure(encoding="utf-8", errors="replace")
+            except (ValueError, OSError):
+                pass
+
+
 def main(argv: list[str] | None = None) -> int:
+    _force_utf8_output()
     args = build_parser().parse_args(argv)
     if args.command in {"check", "score"}:
         return _run_check(Path(args.path), args.format, args.min_score)

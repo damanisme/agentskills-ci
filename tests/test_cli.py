@@ -112,3 +112,21 @@ def test_cli_init_github_action_writes_workflow(tmp_path: Path):
     assert exit_code == 0
     assert workflow.exists()
     assert "agentskills-ci check skills" in workflow.read_text(encoding="utf-8")
+
+
+def test_cli_text_output_survives_legacy_windows_encoding(tmp_path: Path, monkeypatch, capsys):
+    """Reproduces the Windows cp1252 UnicodeEncodeError on emoji in reports."""
+    import io
+
+    write_good_skill(tmp_path)
+    # Simulate a Windows console: a cp1252-backed stdout that cannot encode emoji.
+    cp1252_stdout = io.TextIOWrapper(io.BytesIO(), encoding="cp1252", errors="strict")
+    monkeypatch.setattr("sys.stdout", cp1252_stdout)
+
+    # Must not raise UnicodeEncodeError.
+    exit_code = main(["score", str(tmp_path / "skills")])
+
+    assert exit_code == 0
+    cp1252_stdout.flush()
+    out = cp1252_stdout.buffer.getvalue().decode("utf-8", errors="replace")
+    assert "skills checked" in out

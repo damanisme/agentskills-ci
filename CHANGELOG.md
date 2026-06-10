@@ -4,6 +4,14 @@ All notable changes to `agentskills-ci` are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project aims to follow
 [Semantic Versioning](https://semver.org/).
 
+## [0.1.1] - 2026-06-09
+
+### Fixed
+- Windows: `score`/`check` text output no longer crashes with
+  `UnicodeEncodeError` on consoles using a legacy code page (e.g. cp1252). The
+  CLI now reconfigures stdout/stderr to UTF-8. Found by installing the published
+  package into a clean Windows venv and running it. (regression test added)
+
 ## [Unreleased]
 
 Work from 2026-06-06.
